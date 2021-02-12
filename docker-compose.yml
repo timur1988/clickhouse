@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+    clickhouse-zookeeper:
+        image: zookeeper
+        networks:
+            - int-net
+        ports:
+            - 2181:2181
+            - 2182:2182
+        container_name: clickhouse-zookeeper
+        hostname: clickhouse-zookeeper
+
+    clickhouse-01:
+        image: yandex/clickhouse-server
+        hostname: clickhouse-01
+        container_name: clickhouse-01
+        networks:
+            - int-net
+        ports:
+            - 9001:9000
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/macros-01.xml:/etc/clickhouse-server/config.d/macros.xml
+                - ./config/users.xml:/etc/clickhouse-server/users.xml
+                - ./data/server-01:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper"
+
+networks:
+    int-net:
+        internal: true
+
